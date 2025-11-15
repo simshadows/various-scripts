@@ -1,5 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
 <Foobar>
+    <!-- This is a comment -->
     <Kekw/>
-    <Barbaz lmao="ayy">69420</Barbaz>
-    <Omegalul/>
+    <Barbaz lmao="ayy">lorem ipsum</Barbaz>
+    <Omegalul aaa="a">69420</Omegalul>
+    <Omegalul aaa="b">69420</Omegalul>
+    <Omegalul aaa="c">69420</Omegalul>
 </Foobar>

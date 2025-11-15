@@ -10,7 +10,7 @@
 </xsl:template>
  
 <xsl:template match="Omegalul">
-    <MonkaS/>
+    <MonkaS bbb="{@aaa}"><xsl:value-of select=". + 1"/></MonkaS>
 </xsl:template>
  
 </xsl:stylesheet>
