@@ -63,7 +63,7 @@ def clear_inner(node):
 # HIGHER-LEVEL XPATH-BASED UTILITIES ###########################################
 ################################################################################
 
-def xpath_replace_children_of(root, xpath, new_inner, *, num_expected_changes):
+def xpath_replace_values(root, xpath, new_inner, *, num_expected_changes):
     assert isinstance(root, etree.ElementTree)
     assert isinstance(xpath, str) and xpath
     # new_inner currently only supports text
@@ -75,9 +75,19 @@ def xpath_replace_children_of(root, xpath, new_inner, *, num_expected_changes):
         raise ValueError(f"XPath expected {num_expected_changes} nodes. Instead got {len(nodes)}.\n\nXPath: {xpath}")
 
     for node in nodes:
-        node.text = new_inner
-        for child in list(node):
-            node.remove(child)
+        if isinstance(node, etree._ElementUnicodeResult):
+            if node.is_attribute:
+                if f"@{node.attrname}" not in xpath:
+                    raise ValueError(f"The attribute name is not directly found in the XPath. Your XPath probably works fine, but it should be simplified.\n\nAttribute found: {node.attrname}\n\nXPath: {xpath}")
+                node.getparent().set(node.attrname, new_inner)
+            else:
+                raise RuntimeError("Unsupported operation.")
+        elif isinstance(node, etree.Element):
+            node.text = new_inner
+            for child in list(node):
+                node.remove(child)
+        else:
+            raise RuntimeError(f"XPath resulted in unexpected type `{type(node)}`.")
 
 
 ################################################################################
@@ -107,7 +117,11 @@ def run():
     print(prettyprint(root))
 
     print("===")
-    xpath_replace_children_of(root, "/Foobar/Omegalul", "42069", num_expected_changes=3)
+    xpath_replace_values(root, "/Foobar/Omegalul", "42069", num_expected_changes=3)
+    print(prettyprint(root))
+
+    print("===")
+    xpath_replace_values(root, "/Foobar/Omegalul/@aaa", "e", num_expected_changes=3)
     print(prettyprint(root))
     
     print("===")
