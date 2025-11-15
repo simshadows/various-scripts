@@ -1,15 +1,8 @@
 #!/usr/bin/env python3
 
 """
-Filename: run-test.py
+Filename: utils.py
 Author:   simshadows <contact@simshadows.com>
-
-This is a template script you can use as a base for automated MSXML XSLT testing on Windows.
-This script isn't designed to work on Linux/MacOS. The point of this script is for
-
-We use MSXML exclusively to carry out the transformation, then we use lxml to check the result.
-This allows the code to be easier to port if you need to autotest with a different XML engine.
-I would've liked to use the built-in xml module, but its XPath implementation is too limited.
 """
 
 from copy import deepcopy
@@ -17,11 +10,7 @@ from copy import deepcopy
 import win32com.client
 from lxml import etree
 
-################################################################################
-# BASE UTILITIES ###############################################################
-################################################################################
-
-MSXML_PROGID = "Msxml2.DOMDocument.6.0"
+__MSXML_PROGID = "Msxml2.DOMDocument.6.0"
 
 def read_file(filepath):
     with open(filepath, "r") as f:
@@ -29,7 +18,7 @@ def read_file(filepath):
 
 def msxml_transform(xslt_filepath, xml_data_etree):
     def get_msxml_com(filepath_or_etree):
-        com = win32com.client.Dispatch(MSXML_PROGID)
+        com = win32com.client.Dispatch(__MSXML_PROGID)
         if isinstance(filepath_or_etree, etree.ElementTree):
             success = com.loadXML(etree.tostring(filepath_or_etree).decode())
         elif isinstance(filepath_or_etree, str):
@@ -50,11 +39,6 @@ def msxml_transform(xslt_filepath, xml_data_etree):
 
 def prettyprint(node):
     return etree.tostring(node, pretty_print=True).decode()
-
-
-################################################################################
-# HIGHER-LEVEL XPATH-BASED UTILITIES ###########################################
-################################################################################
 
 def xpath_replace_values(root, xpath, new_inner, *, num_expected_changes):
     if isinstance(new_inner, int):
@@ -101,40 +85,3 @@ def xpath_assert_count(root, xpath, num_expected):
     nodes = root.xpath(xpath)
     if len(nodes) != num_expected:
         raise AssertionError(f"Test failed.\n\nXPath expected {num_expected} nodes. Instead got {len(nodes)}.\n\nXPath: {xpath}")
-
-
-################################################################################
-# TESTS ########################################################################
-################################################################################
-
-XSLT_PATH = "./sample_transform.xslt"
-DATA_PATH = "./sample_data.xml"
-
-def get_input_xml(*, aaa="e", number=42069, has_poggers=False, has_rofl=False):
-    root = read_file(DATA_PATH)
-    xpath_replace_values(root, "/Foobar/Omegalul[@aaa='b']/@aaa", aaa, num_expected_changes=1)
-    xpath_replace_values(root, "/Foobar/Omegalul[@aaa='a' or @aaa='c']", number, num_expected_changes=2)
-    if has_poggers:
-        xpath_add_child_element(root, "/Foobar/Kekw", etree.Element("POGGERS"), num_expected_changes=2)
-    if has_rofl:
-        xpath_add_attribute(root, "/Foobar/Kekw[not(@xd='lmao')]", "rofl", "Yes", num_expected_changes=1)
-    return root
-
-def do_transform(n, input_xml):
-    print(f"Test {n}:")
-    print("===")
-    root_result = msxml_transform(XSLT_PATH, input_xml)
-    print(prettyprint(root_result))
-    print()
-    return root_result
-
-def run_tests():
-    root_result = do_transform(1, get_input_xml(has_poggers=True))
-
-    xpath_assert_count(root_result, "/Foobar/MonkaS[@bbb='x']", 0)
-    
-    root_result = do_transform(2, get_input_xml(aaa="x", number=654, has_rofl=True))
-
-    xpath_assert_count(root_result, "/Foobar/MonkaS[@bbb='x']", 1)
-
-run_tests()
