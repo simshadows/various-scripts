@@ -1,0 +1,37 @@
+#   file: Containerfile
+# author: simshadows <contact@simshadows.com>
+
+FROM node:25-bookworm
+
+#ENV TZ="Australia/Sydney"
+
+# The base image should already have python3
+#RUN apt-get install python3
+# Not yet sure if this is needed
+#RUN apt-get install python-is-python3
+
+# vim is useful for debugging
+RUN apt-get update
+RUN apt-get install -y vim
+
+# repo folder to be a mount point
+RUN mkdir -p /repo
+RUN chown node /repo
+WORKDIR /repo
+
+USER node
+
+ENV PATH="/home/node/.local/bin:${PATH}"
+
+# Install uv
+# (TODO: When uv is available, install that way instead)
+RUN curl -LsSf https://astral.sh/uv/install.sh | sh
+
+# Install Claude Code
+RUN curl -fsSL https://claude.ai/install.sh | bash
+RUN echo '' >> ~/.bashrc
+RUN echo 'export PATH="$HOME/.local/bin:$PATH"' >> ~/.bashrc
+# .claude folder to be a mount point
+RUN mkdir -p /home/node/.claude
+
+ENTRYPOINT sleep infinity
