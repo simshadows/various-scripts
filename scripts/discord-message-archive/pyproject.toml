@@ -5,4 +5,5 @@ description = "Add your description here"
 readme = "README.md"
 dependencies = [
     "discord-py>=2.7.1",
+    "python-dotenv>=1.2.2",
 ]
