@@ -12,7 +12,7 @@ CLAUDE_VOLUME_NAME := $(CONTAINER_NAME)--claude
 ################################################################################
 
 .PHONY: all
-all: build up npm-install start
+all: build up uv-sync start
 
 ################################################################################
 
